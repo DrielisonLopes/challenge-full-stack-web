@@ -1,8 +1,8 @@
 <template>
     <v-data-table
         :headers="headers"
-        :items="Registered"
-        sort-by="nomes"
+        :items="registered"
+        sort-by="nome"
         class="elevation-1"
     >
         <template v-slot:top>
@@ -45,7 +45,7 @@
                         md="4"
                     >
                         <v-text-field
-                        v-model="editedItem.nomes"
+                        v-model="editedItem.nome"
                         label="Nome"
                         ></v-text-field>
                     </v-col>
@@ -146,6 +146,9 @@
     </template>
 
     <script>
+
+    import axios from 'axios'
+
     export default {
         data: () => ({
         dialog: false,
@@ -157,23 +160,31 @@
             sortable: false,
             value: 'ra',
             },
-            { text: 'Nomes', value: 'nomes' },
+            { text: 'nome', value: 'nome' },
             { text: 'CPF', value: 'cpf' },
             { text: 'Ações', value: 'actions', sortable: false },
         ],
-        Registered: [],
+        registered: [],
         editedIndex: -1,
         editedItem: {
-            nomes: '',
+            nome: '',
             email: '',
         },
         defaultItem: {
             ra: '',
-            nomes: '',
+            nome: '',
             cpf: '',
             email: '',
         },
         }),
+        mounted() {
+        axios.get("http://localhost:3000/alunos")
+        .then((response) => { 
+            this.registered = response.data.alunos
+        })
+        .catch(function(error) { this.error = error })
+        .finally(function () { this.pending = false });
+    },
         computed: {
         formTitle () {
             return this.editedIndex === -1 ? 'Novo Aluno' : 'Editar Aluno'
@@ -191,45 +202,20 @@
         this.initialize()
         },
         methods: {
-        initialize () {
-            this.Registered = [
-            {
-                ra: 101235,
-                nomes: 'Drielison Lopes',
-                cpf: 65478912322,
-            },
-            {
-                ra: 111687,
-                nomes: 'Sarutobi Sensei',
-                cpf: 78945612311,
-            },
-            {
-                ra: 11365,
-                nomes: 'Mitchel Telo',
-                cpf: 12345678999,
-            },
-            {
-                ra: 101229,
-                nomes: 'Mauricío Miranda',
-                cpf: 12499999999,
-            },
-            ]
-        },
-
         editItem (item) {
-            this.editedIndex = this.Registered.indexOf(item)
+            this.editedIndex = this.registered.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialog = true
         },
 
         deleteItem (item) {
-            this.editedIndex = this.Registered.indexOf(item)
+            this.editedIndex = this.registered.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialogDelete = true
         },
 
         deleteItemConfirm () {
-            this.Registered.splice(this.editedIndex, 1)
+            this.registered.splice(this.editedIndex, 1)
             this.closeDelete()
         },
 
@@ -251,12 +237,22 @@
 
         save () {
             if (this.editedIndex > -1) {
-            Object.assign(this.Registered[this.editedIndex], this.editedItem)
+            Object.assign(this.registered[this.editedIndex], this.editedItem)
             } else {
-            this.Registered.push(this.editedItem)
-            }
-            this.close()
-        },
+            axios({
+                method: "POST",
+                url: "http://localhost:3000/alunos/new",
+                data: {
+                    nome: this.editedItem.nome,
+                    email: this.editedItem.email,
+                    ra: this.editedItem.ra,
+                    cpf: this.editedItem.cpf
+                }
+            });
+            this.registered.push(this.editedItem)
+                    }
+                    this.close()
+            },
         },
     }
 </script>
