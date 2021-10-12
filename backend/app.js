@@ -1,10 +1,15 @@
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
+const bodyParser = require('body-parser')
 
-const registeredsnRoute = require('./routes/registered')
 const studentsRoute = require('./routes/students')
 const usersRoute = require('./routes/users')
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
 
 // o morgan executa um callback para dar proseguimento ao projeto
 app.use(morgan('dev'));
@@ -26,7 +31,6 @@ app.use((req, res, next) => {
     next();
 })
 
-app.use('/registered', registeredsnRoute)
 app.use('/alunos', studentsRoute)
 app.use('/usuarios', usersRoute)
 

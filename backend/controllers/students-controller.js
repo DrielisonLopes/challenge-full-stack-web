@@ -4,27 +4,18 @@ exports.getAlunos = (req, res, next) =>{
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query (
-            'SELECT * FROM alunos;',
+            'SELECT * FROM cadastroalunos;',
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
                     quantidade: result.length,
                     alunos: result.map(aluno => {
                         return {
-                            id_aluno: aluno.id_aluno,
-                            quantidade: aluno.quantidade,
-                            cadastro: {
                                 id_cadastro: aluno.id_cadastro,
                                 nome: aluno.nome,
                                 email: aluno.email,
-                                ra: aluno.ra,
-                                cpf: aluno.cpf
-                            },
-                            request: {
-                                tipo: 'GET',
-                                descricao: 'Retorna os detalhes de um aluno específico',
-                                url: 'http//localhost:3000/alunos/' + aluno.id_aluno
-                            }
+                                ra: aluno.RA,
+                                cpf: aluno.CPF
                         }
                     })
                 }
@@ -34,42 +25,16 @@ exports.getAlunos = (req, res, next) =>{
     })
 }
 
-exports.postAlunos = (req, res, next) =>{
-
+exports.postAluno = (req, res, next) =>{
     mysql.getConnection((error, conn) => {
-        if (error) { return res.status(500).send({ error: error })}
-        conn.query('SELECT * FROM cadastros WHERE id_cadastro = ?',
-        [req.body.id_cadastro],
+        conn.query('INSERT INTO cadastroalunos (nome, email, ra, cpf) VALUES (?,?,?,?)',
+        [req.body.nome, req.body.email, req.body.ra, req.body.cpf],
         (error, result, field) => {
             if (error) { return res.status(500).send({ error : error })}
-            if (result.length === 0) {
-                return res.status(404).send({
-                    message : 'Não foi encontrado Aluno com esse ID'
+                return res.status(200).send({
+                    nome: "Aluno cadastrado com sucesso!"
                 })
-            }
-            conn.query (
-                'INSERT INTO alunos (id_cadastro, quantidade) VALUES (?, ?);',
-                [req.body.id_cadastro, req.body.quantidade],
-                (error, result, field) => {
-                    conn.release();
-                    if (error) { return res.status(500).send({ error: error }) }
-                    const response = {
-                        message: 'Aluno inserido com sucesso',
-                        alunoCriado : {
-                            id_aluno: result.id_aluno,
-                            id_cadastro: req.body.cadastro,
-                            quantidade: req.body.quantidade,
-                            request: {
-                                tipo: 'GET',
-                                descricao: 'Retorna todos os alunos',
-                                url: 'http//localhost:3000/alunos'
-                            }
-                        }
-                    }
-                    return res.status(200).send(response)
-                }
-            )
-        })
+            })
     })
 }
 
@@ -108,7 +73,7 @@ exports.deleteAluno = (req, res, next) =>{
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            `DELETE FROM alunos WHERE id_aluno   = ?`, [req.body.id_aluno],
+            `DELETE FROM alunos WHERE id_aluno = ?`, [req.body.id_aluno],
             (error, result, field) => {
                 conn.release()
                 if (error) { return res.status(500).send({ error: error }) }  

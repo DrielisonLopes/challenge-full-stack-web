@@ -1,7 +1,7 @@
 {
     "env": {
         "MYSQL_USER" : "root",
-        "MYSQL_PASSWORD" : "root",
+        "MYSQL_PASSWORD" : "vender3sql",
         "MYSQL_DATABASE" : "postapp",
         "MYSQL_HOST" : "localhost",
         "MYSQL_PORT" : 3306,
